@@ -65,17 +65,20 @@ if (-not $Backend) {
   else { $Backend = 'vulkan'; Write-Warning 'No NVIDIA GPU found: using the Vulkan build (AMD/Intel GPUs). This path is untested; -Backend cpu runs without a GPU.' }
 }
 
-# Pick settings from VRAM and RAM (measured numbers in README.md). The model needs to fit in VRAM + RAM
-# with room for Windows: weights that don't fit on the GPU live in RAM.
+# Pick settings from VRAM and RAM (measured in README.md, "Weaker PCs"). llama-server holds a copy of the
+# weights in RAM (about 21 GB for Q4, 17 for Q3, 13 for Q2), so RAM limits the quant as much as VRAM does.
 function Pick {
   if ($Backend -eq 'cpu') { return @('Q4_K_XL', 'cpu') }
   if ($Backend -eq 'vulkan') { return @('Q4_K_XL', 'fit') }
-  if ($vramGB -ge 22) { return @('Q4_K_XL', 'full') }
-  $budget = $vramGB + $ramGB - 8          # leave ~8 GB of RAM for Windows and your apps
-  if ($budget -ge 20) { return @('Q4_K_XL', 'fit') }
-  if ($budget -ge 15) { return @('Q3_K_XL', 'fit') }
-  if ($budget -ge 11) { return @('Q2_K_XL', 'fit') }
-  throw "This PC has $vramGB GB VRAM + $ramGB GB RAM; Inkling 2 Mini needs about 12 GB combined plus room for Windows."
+  if ($vramGB -ge 22 -and $ramGB -ge 30) { return @('Q4_K_XL', 'full') }   # ~60 tok/s
+  if ($vramGB -ge 15 -and $ramGB -ge 22) { return @('Q3_K_XL', 'fit') }    # all on GPU, ~54 tok/s
+  if ($vramGB -ge 11 -and $ramGB -ge 30) { return @('Q4_K_XL', 'fit') }    # experts overflow to RAM, ~29 tok/s
+  if ($vramGB -ge 7  -and $ramGB -ge 15) { return @('Q2_K_XL', 'fit') }    # ~41 tok/s on 8 GB, ~57 on 12 GB
+  if ($ramGB -ge 30) {
+    Write-Warning 'No usable GPU: CPU only runs at about 3.5 tok/s. Fine for short chats, too slow for coding.'
+    return @('Q4_K_XL', 'cpu')
+  }
+  throw "This PC has $vramGB GB VRAM and $ramGB GB RAM. Inkling 2 Mini needs at least an 8 GB GPU with 16 GB RAM, or 32 GB RAM without a GPU."
 }
 $pick = Pick
 if (-not $Quant) { $Quant = $pick[0] }

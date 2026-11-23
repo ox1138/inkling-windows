@@ -189,7 +189,7 @@ function Sync-PiConfig {
   New-Item -ItemType Directory -Force $env:PI_CODING_AGENT_DIR | Out-Null
   # Pi's context window must match the server's, or long sessions overflow it.
   $m = Get-Content (Join-Path $Cfg 'pi\models.json') -Raw | ConvertFrom-Json
-  foreach ($x in $m.providers.'local-llama'.models) { $x.contextWindow = [int]$Ctx }
+  foreach ($x in $m.providers.'local-llama'.models) { $x.contextWindow = [int]$Ctx; $x.name = "Inkling 2 Mini (UD-$Quant, llama.cpp, local)" }
   [IO.File]::WriteAllText((Join-Path $env:PI_CODING_AGENT_DIR 'models.json'), ($m | ConvertTo-Json -Depth 20))  # no BOM
   $s = Join-Path $env:PI_CODING_AGENT_DIR 'settings.json'
   if (-not (Test-Path $s)) { Copy-Item (Join-Path $Cfg 'pi\settings.json') $s }

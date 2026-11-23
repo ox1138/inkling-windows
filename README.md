@@ -143,4 +143,7 @@ opencode's first step is 15.2K prompt tokens (12 s to process); Pi's is 2.1K, an
   before gaming, or set `INKLING_DRAFT=0` / `INKLING_CTX=32768`.
 - **The model can act on its own.** Pi doesn't sandbox commands. The confirm prompt is a guard, not a sandbox: use `ink` in folders under git.
 - **It can loop when debugging.** The 8K output cap limits that. `INKLING_THINK=low` helps too.
+- **MCP servers.** `ink` gives Pi its own config folder, so Pi doesn't see servers set up for Claude Code or a
+  normal Pi install. Add them to `%LOCALAPPDATA%\inkling\pi\mcp.json` (same `mcpServers` format as Claude Code) and
+  check them with `/mcp` inside `ink`. `ink chat` runs without MCP.
 - **Pi `-p` mode waits on piped stdin.** `ink ask` handles this. If you script Pi yourself, add `< NUL`.

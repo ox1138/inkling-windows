@@ -1,0 +1,8 @@
+node_modules/
+__pycache__/
+llama.cpp/
+models/
+tools/
+dl/
+scripts/*.log
+ink.config.json

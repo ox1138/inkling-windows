@@ -1,0 +1,7 @@
+{
+  "defaultProvider": "local-llama",
+  "defaultModel": "inkling-2-mini",
+  "hideThinkingBlock": true,
+  "quietStartup": true,
+  "lastChangelogVersion": "1.6.0"
+}
